@@ -17,43 +17,54 @@ io.on('connection', (client) => {
 
         client.join(data.sala);
 
-        usuarios.agregarPersona(client.id, data.nombre, data.sala);
+        usuarios.agregarUsuario(client.id, data.nombre, data.sala);
 
-        let personas = usuarios.getPersonasPorSala(data.sala);
+        let usuariosPorSala = usuarios.getUsuariosPorSala(data.sala);
 
-        client.broadcast.to(data.sala).emit('listaPersonas', personas);
+        client.broadcast.to(data.sala).emit('listaUsuarios', usuariosPorSala);
         client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${data.nombre} se unió`));
 
-        callback(personas);
+        callback(usuariosPorSala);
 
     });
 
     client.on('crearMensaje', (data, callback) => {
-        let persona = usuarios.getPersona(client.id);
-        let mensaje = crearMensaje(persona.nombre, data.mensaje);
+        let usuario = usuarios.getUsuario(client.id);
+        let mensaje = crearMensaje(usuario.nombre, data.mensaje);
 
-        client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+        client.broadcast.to(usuario.sala).emit('crearMensaje', mensaje);
         callback(mensaje);
     });
 
     client.on('disconnect', () => {
 
-        let personaBorrada = usuarios.borrarPersona(client.id);
+        let usuarioBorrada = usuarios.borrarUsuario(client.id);
 
-        client.broadcast.to(personaBorrada.sala).emit('crearMensaje', crearMensaje('Administrador', `${personaBorrada.nombre} salió`));
+        client.broadcast.to(usuarioBorrada.sala).emit('crearMensaje', crearMensaje('Administrador', `${usuarioBorrada.nombre} salió`));
 
-        client.broadcast.to(personaBorrada.sala).emit('listaPersonas', usuarios.getPersonasPorSala(personaBorrada.sala));
+        client.broadcast.to(usuarioBorrada.sala).emit('listaUsuarios', usuarios.getUsuariosPorSala(usuarioBorrada.sala));
 
     });
 
     // Mensajes privados
 
-    client.on('mensajePrivado', (data) => {
+    client.on('mensajePrivado', (data, callback) => {
         
-        let persona = usuarios.getPersona( client.id );
+        let usuario = usuarios.getUsuario( client.id );
 
-        client.broadcast.to(data.destinatario).emit('mensajePrivado', crearMensaje(persona.nombre, data.mensaje));
+        let mensaje = crearMensaje(usuario.nombre, data.mensaje);
 
+        client.broadcast.to(data.destinatario).emit('mensajePrivado', mensaje);
+        callback(mensaje);
+    });
+
+    client.on('informacionUsuario', (id, callback) => {
+
+        let usuario = usuarios.getUsuario( id );
+
+        client.broadcast.to(client.id).emit('informacionUsuario', usuario);
+
+        callback(usuario);
     });
 
 });

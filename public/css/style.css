@@ -996,8 +996,9 @@ File: scss
 
 .page-wrapper {
   background: #f4f6f9;
-  padding-bottom: 60px;
-  position: relative; }
+  padding-bottom: 30px;
+ /* position: relative; */
+}
 
 .container-fluid {
   padding: 25px 25px; }
@@ -1021,7 +1022,8 @@ File: scss
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05); }
 
 .fix-header .page-wrapper {
-  padding-top: 70px; }
+  padding-top: 30px;
+ }
 
 .fix-header .right-side-panel {
   top: 70px;

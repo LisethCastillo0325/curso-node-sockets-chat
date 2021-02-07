@@ -1,7 +1,12 @@
 .chat-list {
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
-    height: 600px !important;
+    height: 400px !important;
+}
+.slc-header {
+    height: 70px !important;
+    display: flex;
+    align-items: center;
 }
 
 textarea {

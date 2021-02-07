@@ -13,7 +13,6 @@ var usuario = {
 };
 
 
-
 socket.on('connect', function() {
     console.log('Conectado al servidor');
 
@@ -47,10 +46,15 @@ socket.on('crearMensaje', function(mensaje) {
     scrollBottom();
 });
 
+socket.on('mensajePrivado', function(mensaje){
+    renderizarMensajes(mensaje, false);
+    scrollBottom();
+});
+
 // Escuchar cambios de usuarios
 // cuando un usuario entra o sale del chat
-socket.on('listaPersona', function(personas) {
-    renderizarUsuarios(personas);
+socket.on('listaUsuarios', function(usuarios) {
+    renderizarUsuarios(usuarios);
 });
 
 // Mensajes privados

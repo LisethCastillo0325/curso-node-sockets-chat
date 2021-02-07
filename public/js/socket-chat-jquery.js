@@ -9,28 +9,49 @@ var divUsuarios = $('#divUsuarios');
 var formEnviar = $('#formEnviar');
 var txtMensaje = $('#txtMensaje');
 var divChatbox = $('#divChatbox');
-
+var divTitleChat = $('#divTitleChat');
+var divUsuario = $('#divUsuario');
+var idPrivado;
 
 // Funciones para renderizar usuarios
-function renderizarUsuarios(personas) { // [{},{},{}]
+function renderizarUsuarios(usuarios) { // [{},{},{}]
 
-    console.log(personas);
+    renderizarDatosUsario();
 
     var html = '';
 
     html += '<li>';
-    html += '    <a href="javascript:void(0)" class="active"> Chat de <span> ' + params.get('sala') + '</span></a>';
+    html += '    <a href="javascript:void(0)" data-sala="'+ sala + '" class="active"><img src="assets/images/users/7.jpg" alt="user-img" class="img-circle"><span> ' + sala + '</span></a>';
     html += '</li>';
 
-    for (var i = 0; i < personas.length; i++) {
-
+    for (var i = 0; i < usuarios.length; i++) {
         html += '<li>';
-        html += '    <a data-id="' + personas[i].id + '"  href="javascript:void(0)"><img src="assets/images/users/1.jpg" alt="user-img" class="img-circle"> <span>' + personas[i].nombre + ' <small class="text-success">online</small></span></a>';
+        html += '    <a data-id="' + usuarios[i].id + '"  href="javascript:void(0)"><img src="assets/images/users/1.jpg" alt="user-img" class="img-circle"> <span>' + usuarios[i].nombre + ' <small class="text-success">online</small></span></a>';
         html += '</li>';
     }
 
     divUsuarios.html(html);
+}
 
+function renderizarTituloMensajes(titulo){
+    var html = '';
+    html += '<h4 class="box-title">' + titulo + '</h4>';
+    divTitleChat.html(html);
+}
+
+function renderizarDatosUsario(){
+    var html = '';
+
+    html += ' <a href="javascript:void(0)" data-sala="'+ sala + '" class="active"><img src="assets/images/users/4.jpg" alt="user-img" class="img-circle responsive"><span> ' + nombre + '</span></a>';
+
+    divUsuario.html(html);
+}
+
+function renderizarChatPrivado(usuario){
+
+    renderizarTituloMensajes('Mensaje privado a: ' + usuario.nombre);
+
+   // divChatbox.html('');
 }
 
 
@@ -94,18 +115,20 @@ function scrollBottom() {
     }
 }
 
-
+renderizarTituloMensajes(params.get('sala') + '<br><small>Grupo</small>');
 
 
 // Listeners
 divUsuarios.on('click', 'a', function() {
-
-    var id = $(this).data('id');
-
-    if (id) {
-        console.log(id);
+    idPrivado = $(this).data('id');
+    var sala = $(this).data('sala');
+    if (idPrivado) {
+        socket.emit('informacionUsuario', idPrivado, function(usuario){
+            renderizarChatPrivado(usuario);
+        })
+    }else if(sala){
+        renderizarTituloMensajes(sala + '<br><small>Grupo</small>');
     }
-
 });
 
 formEnviar.on('submit', function(e) {
@@ -115,11 +138,20 @@ formEnviar.on('submit', function(e) {
     if (txtMensaje.val().trim().length === 0) {
         return;
     }
-
-    socket.emit('crearMensaje', {
+    var evento = '';
+    var data = {
         nombre: nombre,
         mensaje: txtMensaje.val()
-    }, function(mensaje) {
+    };
+
+    if (idPrivado) {
+        evento = 'mensajePrivado';
+        data.destinatario = idPrivado;
+    }else{
+        evento = 'crearMensaje';
+    }
+
+    socket.emit(evento, data, function(mensaje) {
         txtMensaje.val('').focus();
         renderizarMensajes(mensaje, true);
         scrollBottom();
